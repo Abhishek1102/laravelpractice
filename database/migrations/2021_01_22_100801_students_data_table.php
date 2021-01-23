@@ -13,11 +13,12 @@ class StudentsDataTable extends Migration
      */
     public function up()
     {
-        Schema::table('students',function($table){
+        Schema::create('students',function(Blueprint $table){
             $table->string('name');
             $table->string('lastname');
             $table->string('email');
             $table->string('password');
+            $table->timestamps();
         });
     }
 
@@ -28,6 +29,6 @@ class StudentsDataTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('students');
     }
 }

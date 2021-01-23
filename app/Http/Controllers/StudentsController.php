@@ -5,6 +5,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\Models\Students;
+use Facade\FlareClient\Http\Response;
 
 class StudentsController extends Controller
 {
@@ -15,8 +17,8 @@ class StudentsController extends Controller
      */
     public function index()
     {
-        $a = DB::table('students')->get();
-        return view('practice1.showall',['a'=>$a]);
+        $students = Students::latest()->paginate(4);
+        return view('students.index',compact('students'))->with('i',(\request()->input('page',1) - 1) * 4);
     }
 
     /**
@@ -37,15 +39,25 @@ class StudentsController extends Controller
      */
     public function store(Request $request)
     {
-        $flag = DB::table('students')->insert(['name'=>$request->name, 'lastname'=>$request->lastname, 'email'=>$request->email, 'password'=>$request->password]);
-        if($flag)
+       $r=$request->validate([
+           'name'=>'required',
+           'lastname'=>'required',
+           'email'=>'required',
+           'password'=>'password'
+       ]);
+
+       $studId = $request->stud_id;
+        Students::updateOrCreate(['id'=>$studId],['name'=>$request->name,'lastname'=>$request->lastname,'email'=>$request->email,'password'=>$request->password]);
+        if(empty($request->stud_id))
         {
-            return redirect()->back();
+            $msg = 'Student entry created successfully';
         }
         else
         {
-            return "failed to submit data";
+            $msg = 'Student data updated successfully';
         }
+        return redirect()->route('Students.index')->with('success',$msg);
+
     }
 
     /**
@@ -56,8 +68,7 @@ class StudentsController extends Controller
      */
     public function show($id)
     {
-        $d = DB::table('students')->where('id',$id)->get();
-        return view('practice1.show',['d'=>$d]);
+      return view('students.show',compact('students'));
 
     }
 
@@ -69,8 +80,9 @@ class StudentsController extends Controller
      */
     public function edit($id)
     {
-        $students = DB::table('students')->where('id',$id)->first();
-        return view('practice1.edit',compact('students'));
+        $where = array('id' => $id);
+        $student = Students::where($where)->first();
+        return response()->json($student);
     }
 
     /**
@@ -82,15 +94,7 @@ class StudentsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $flag= DB::table('students')->where('id',$id)->update(['name'=>$request->name, 'lastname'=>$request->lastname, 'email'=>$request->email, 'password'=>$request->password]);
-        if($flag)
-        {
-            return "Data submitted successfully";
-        }
-        else
-        {
-            return "failed to submit data";
-        }   
+       
     }
 
     /**
@@ -101,6 +105,7 @@ class StudentsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $stud = Students::where('id',$id)->delete();
+        return response()->json($stud);
     }
 }

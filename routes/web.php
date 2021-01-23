@@ -18,8 +18,12 @@ Route::get('/', function () {
 });
 */
 Route::get('/student/create','App\Http\Controllers\StudentsController@create');
-Route::post('/students/store', 'App\Http\Controllers\StudentsController@store')->name('student_store');
+//Route::post('/students/store', 'App\Http\Controllers\StudentsController@store')->name('student_store');
 Route::get('/student/{id?}', '\App\Http\Controllers\StudentsController@show');
 Route::get('/student', '\App\Http\Controllers\StudentsController@index');
 Route::get('/student/edit/{id}', '\App\Http\Controllers\StudentsController@edit');
 Route::post('/student/{id}', '\App\Http\Controllers\StudentsController@update')->name('student_update');
+
+Route::resource('students', 'App\Http\Controllers\StudentsController');
+Route::get('students/{id}/edit/','StudentsController@edit');
+Route::post('/students/store', 'App\Http\Controllers\StudentsController@store')->name('student_store');
